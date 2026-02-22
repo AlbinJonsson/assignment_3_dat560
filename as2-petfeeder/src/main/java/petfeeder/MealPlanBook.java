@@ -32,6 +32,9 @@ public class MealPlanBook {
     public synchronized boolean addMealPlan(MealPlan m) {
         //Assume meal plan doesn't exist in the array until 
         //find out otherwise
+        if(m==null){
+            return false;
+        }
         boolean exists = false;
         //Check that meal plan doesn't already exist in array
         for (int i = 0; i < mealPlanArray.length; i++ ) {
