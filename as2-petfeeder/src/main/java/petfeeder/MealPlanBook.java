@@ -64,9 +64,11 @@ public class MealPlanBook {
      * @return String The name of the deleted meal plan.
      */
     public synchronized String deleteMealPlan(int mealPlanToDelete) {
+        if(mealPlanToDelete<0 || mealPlanToDelete > mealPlanArray.length)return null;
+
         if (mealPlanArray[mealPlanToDelete] != null) {
             String name = mealPlanArray[mealPlanToDelete].getName();
-            mealPlanArray[mealPlanToDelete] = new MealPlan();
+            mealPlanArray[mealPlanToDelete] = null;
             return name;
         } else {
             return null;
@@ -81,6 +83,8 @@ public class MealPlanBook {
      * @return String The name of the original meal plan.
      */
     public synchronized String editMealPlan(int mealPlanToEdit, MealPlan newMealPlan) {
+        if(newMealPlan==null || mealPlanToEdit<0 || mealPlanToEdit > mealPlanArray.length)return null;
+
         if (mealPlanArray[mealPlanToEdit] != null) {
             String name = mealPlanArray[mealPlanToEdit].getName();
             newMealPlan.setName("");
