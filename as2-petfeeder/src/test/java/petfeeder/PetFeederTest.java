@@ -3,6 +3,7 @@ package petfeeder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import petfeeder.exceptions.FoodStockException;
+import petfeeder.exceptions.MealPlanException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -245,10 +246,23 @@ class PetFeederTest {
         assertFalse(pf.dispenseMeal(-1));
     }
 
+
     /** Verifies that an index that is out of bounds of the array returns false*/
     @Test
     void testDispenseMeal_outOfBoundsIndexInput_returnsFalse(){
         assertFalse(pf.dispenseMeal(pf.getMealPlans().length+1));
+    }
+
+    /** Verifies that when the meal plan has an ingredient that exceeds the Stock
+     * of that ingredient, it should return false.
+     */
+    @Test
+    void testDispenseMeal_insufficientIngredients_returnsFalse()throws MealPlanException {
+        MealPlan exceedStockMealPlan = new MealPlan();
+        exceedStockMealPlan.setAmtKibble("16");
+        pf.addMealPlan(exceedStockMealPlan);
+
+        assertFalse(pf.dispenseMeal(0));
     }
 
     /** Verifies that getMealPlans does not return null*/
