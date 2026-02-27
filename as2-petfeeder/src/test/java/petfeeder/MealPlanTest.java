@@ -202,4 +202,87 @@ class MealPlanTest {
         assertEquals(500, mp.getEnergyCost());
     }
 
+    /** Verifies that the toString function returns the correct meal plan name */
+    @Test
+    void testToString_returnsName() {
+        MealPlan m = new MealPlan();
+        m.setName("Morning Feast");
+
+        assertEquals("Morning Feast", m.toString());
+    }
+
+    /** Verify that hashCode uses the name’s hash when name is not null */
+    @Test
+    void testHashCode_whenNameSet_returnsCorrectHash() {
+        MealPlan m = new MealPlan();
+        m.setName("Morning Feast");
+
+        int expected = 31 + "Morning Feast".hashCode();
+
+        assertEquals(expected, m.hashCode());
+    }
+
+    /** Verify that hashCode returns base value when name is null*/
+    @Test
+    void testHashCode_whenNameNull_returns31() {
+        MealPlan m = new MealPlan();
+
+        assertEquals(31, m.hashCode());
+    }
+    /** Verifies that the equals method returns true when comparing an object to itself */
+    @Test
+    void testEquals_sameObject_returnsTrue() {
+        MealPlan m = new MealPlan();
+        assertTrue(m.equals(m));
+    }
+
+    /** Verifies that the equals method returns false when comparing a MealPlan object to null */
+    @Test
+    void testEquals_nullObject_returnsFalse() {
+        MealPlan m = new MealPlan();
+        assertFalse(m.equals(null));
+    }
+
+    /** Verifies that the equals method returns false when comparing a MealPlan object to an object of a different class */
+    @Test
+    void testEquals_differentClass_returnsFalse() {
+        MealPlan m = new MealPlan();
+        String notMealPlan = "Not a meal plan";
+
+        assertFalse(m.equals(notMealPlan));
+    }
+
+    /** Verifies that the equals method returns true when both MealPlan objects has no name */
+    @Test
+    void testEquals_bothNamesEmpty_returnsTrue() {
+        MealPlan m1 = new MealPlan();
+        MealPlan m2 = new MealPlan();
+
+        assertTrue(m1.equals(m2));
+    }
+
+    /** Verifies that the equals method returns false when two MealPlan objects have different names*/
+    @Test
+    void testEquals_differentNames_returnsFalse() {
+        MealPlan m1 = new MealPlan();
+        m1.setName("Breakfast");
+
+        MealPlan m2 = new MealPlan();
+        m2.setName("Dinner");
+
+        assertFalse(m1.equals(m2));
+    }
+
+    /** Verifies that the equals method returns true when two MealPlan objects have the same name */
+    @Test
+    void testEquals_sameNames_returnsTrue() {
+        MealPlan m1 = new MealPlan();
+        m1.setName("Lunch");
+
+        MealPlan m2 = new MealPlan();
+        m2.setName("Lunch");
+
+        assertTrue(m1.equals(m2));
+    }
+
 }
