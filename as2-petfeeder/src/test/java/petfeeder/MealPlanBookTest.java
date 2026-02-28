@@ -2,6 +2,7 @@ package petfeeder;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class MealPlanBookTest {
@@ -13,70 +14,106 @@ class MealPlanBookTest {
         book = new MealPlanBook();
     }
 
+    // -----------------------------
+    // ADD MEAL PLAN TESTS
+    // -----------------------------
+
     @Test
-    void addMealPlan_success() {
+    void testAddMealPlan_validInput_returnsTrue() {
         MealPlan m = new MealPlan();
         boolean result = book.addMealPlan(m);
-        assertTrue(result, "Meal plan should be added successfully");
+
+        assertTrue(result);
     }
 
     @Test
-    void addMealPlan_duplicate_shouldFail() {
-        MealPlan m = new MealPlan();
-        book.addMealPlan(m);
-        boolean result = book.addMealPlan(m);
-        assertFalse(result, "Duplicate meal plan should not be added");
+    void testAddMealPlan_increasesMealCount() {
+        int countBefore = countNonNull(book.getMealPlans());
+
+        book.addMealPlan(new MealPlan());
+
+        int countAfter = countNonNull(book.getMealPlans());
+
+        assertEquals(countBefore + 1, countAfter);
     }
 
     @Test
-    void addMealPlan_whenFull_shouldFail() {
+    void testAddMealPlan_whenArrayFull_returnsFalse() {
         for (int i = 0; i < 4; i++) {
             book.addMealPlan(new MealPlan());
         }
+
         boolean result = book.addMealPlan(new MealPlan());
-        assertFalse(result, "Should not add meal plan when book is full");
+        assertFalse(result);
     }
 
-
     @Test
-    void deleteMealPlan_success() {
+    void testAddMealPlan_duplicate_returnsFalse() {
         MealPlan m = new MealPlan();
         book.addMealPlan(m);
 
-        String deletedName = book.deleteMealPlan(0);
-        assertNotNull(deletedName, "Deleted meal plan name should not be null");
+        boolean result = book.addMealPlan(m);
+        assertFalse(result);
     }
 
     @Test
-    void deleteMealPlan_emptySlot_shouldReturnNull() {
-        String deletedName = book.deleteMealPlan(0);
-        assertNull(deletedName, "Deleting empty slot should return null");
+    void testAddMealPlan_nullInput_returnsFalse() {
+        boolean result = book.addMealPlan(null);
+        assertFalse(result);
     }
 
+    // -----------------------------
+    // DELETE TESTS
+    // -----------------------------
 
     @Test
-    void editMealPlan_success() {
+    void testDeleteMealPlan_validIndex_returnsName() {
+        MealPlan m = new MealPlan();
+        book.addMealPlan(m);
+
+        String name = book.deleteMealPlan(0);
+
+        assertNotNull(name);
+    }
+
+    @Test
+    void testDeleteMealPlan_emptySlot_returnsNull() {
+        String name = book.deleteMealPlan(0);
+        assertNull(name);
+    }
+
+    // -----------------------------
+    // EDIT TESTS
+    // -----------------------------
+
+    @Test
+    void testEditMealPlan_validIndex_returnsOriginalName() {
         MealPlan oldMeal = new MealPlan();
         book.addMealPlan(oldMeal);
 
         MealPlan newMeal = new MealPlan();
-        String originalName = book.editMealPlan(0, newMeal);
+        String name = book.editMealPlan(0, newMeal);
 
-        assertNotNull(originalName, "Editing existing meal plan should return original name");
+        assertNotNull(name);
     }
 
     @Test
-    void editMealPlan_emptySlot_shouldReturnNull() {
+    void testEditMealPlan_emptySlot_returnsNull() {
         MealPlan newMeal = new MealPlan();
         String result = book.editMealPlan(0, newMeal);
 
-        assertNull(result, "Editing empty slot should return null");
+        assertNull(result);
     }
 
+    // -----------------------------
+    // HELPER METHOD
+    // -----------------------------
 
-    @Test
-    void getMealPlans_shouldReturnArrayOfSize4() {
-        MealPlan[] plans = book.getMealPlans();
-        assertEquals(4, plans.length, "MealPlanBook should hold 4 meal plans");
+    private int countNonNull(MealPlan[] plans) {
+        int count = 0;
+        for (MealPlan p : plans) {
+            if (p != null) count++;
+        }
+        return count;
     }
 }

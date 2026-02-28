@@ -29,20 +29,25 @@ class FeedingSchedulerTest {
 
     @Test
     void schedulerInitiallyInactive() {
-        assertFalse(scheduler.hasActiveSchedule());
+        assertFalse(scheduler.hasActiveSchedule(),
+                "Scheduler should not be active initially");
     }
 
     @Test
     void scheduleStartsSuccessfully() {
         scheduler.scheduleRecurringFeeding(0, 1);
-        assertTrue(scheduler.hasActiveSchedule());
+
+        assertTrue(scheduler.hasActiveSchedule(),
+                "Scheduler should be active after scheduling");
     }
 
     @Test
     void stopRemovesActiveSchedule() {
         scheduler.scheduleRecurringFeeding(0, 1);
         scheduler.stop();
-        assertFalse(scheduler.hasActiveSchedule());
+
+        assertFalse(scheduler.hasActiveSchedule(),
+                "Scheduler should not be active after stop()");
     }
 
     // ---------------------------
@@ -54,30 +59,41 @@ class FeedingSchedulerTest {
         scheduler.scheduleRecurringFeeding(0, 1);
         assertTrue(scheduler.hasActiveSchedule());
 
-        scheduler.scheduleRecurringFeeding(0, 1); // should replace previous
-        assertTrue(scheduler.hasActiveSchedule());
-    }
-
-    // ---------------------------
-    // FUNCTIONAL BEHAVIOR TEST
-    // ---------------------------
-
-    @Test
-    void schedulerDoesNotCrashWithInvalidMealIndex() {
-        scheduler.scheduleRecurringFeeding(99, 1); // invalid index
-
-        assertTrue(scheduler.hasActiveSchedule()); // scheduler should still run
-    }
-
-    // ---------------------------
-    // STOP PREVENTS FURTHER SCHEDULING
-    // ---------------------------
-
-    @Test
-    void stopPreventsFurtherExecution() {
         scheduler.scheduleRecurringFeeding(0, 1);
-        scheduler.stop();
 
-        assertFalse(scheduler.hasActiveSchedule());
+        assertTrue(scheduler.hasActiveSchedule(),
+                "New schedule should replace old one without error");
+    }
+
+    // ---------------------------
+    // INVALID INPUT TESTS
+    // ---------------------------
+
+    @Test
+    void scheduleWithInvalidMealIndexThrowsException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                        scheduler.scheduleRecurringFeeding(99, 1),
+                "Invalid meal index should throw exception");
+    }
+
+    @Test
+    void scheduleWithNegativeMealIndexThrowsException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                        scheduler.scheduleRecurringFeeding(-1, 1),
+                "Negative meal index should throw exception");
+    }
+
+    @Test
+    void scheduleWithZeroPeriodThrowsException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                        scheduler.scheduleRecurringFeeding(0, 0),
+                "Zero period should throw exception");
+    }
+
+    @Test
+    void scheduleWithNegativePeriodThrowsException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                        scheduler.scheduleRecurringFeeding(0, -5),
+                "Negative period should throw exception");
     }
 }
