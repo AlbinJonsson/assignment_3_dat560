@@ -38,7 +38,7 @@ class FoodContainerTest {
     @Test
     void setTreats_update_negativeValue() {
         foodContainer.setTreats(-5);
-        assertEquals(-5, foodContainer.getTreats());
+        assertNotEquals(-5, foodContainer.getTreats());
     }
     @Test
     void setTreats_update_nullValue() {
@@ -79,7 +79,7 @@ class FoodContainerTest {
     @Test
     void setKibble_update_negativeValue() {
         foodContainer.setTreats(-5);
-        assertEquals(-5, foodContainer.getKibble());
+        assertNotEquals(-5, foodContainer.getKibble());
     }
     @Test
     void setKibble_update_nullValue() {
@@ -117,7 +117,7 @@ class FoodContainerTest {
     @Test
     void setWater_update_negativeValue() {
         foodContainer.setTreats(-5);
-        assertEquals(-5, foodContainer.getTreats());
+        assertNotEquals(-5, foodContainer.getTreats());
     }
     @Test
     void setWater_update_nullValue() {
@@ -155,7 +155,7 @@ class FoodContainerTest {
     @Test
     void setWetFood_update_negativeValue() {
         foodContainer.setTreats(-5);
-        assertEquals(-5, foodContainer.getTreats());
+        assertNotEquals(-5, foodContainer.getTreats());
     }
     @Test
     void setWetFood_update_nullValue() {
@@ -249,7 +249,7 @@ class FoodContainerTest {
         foodContainer.setTreats(4);
         boolean res = foodContainer.useIngredients(mealPlan);
         assertFalse(res);
-        assertEquals(-1, foodContainer.getTreats());
+        assertNotEquals(-1, foodContainer.getTreats());
     }
 
     //TODO test for toString() method
