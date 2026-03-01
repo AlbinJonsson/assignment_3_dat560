@@ -19,6 +19,9 @@ public class FeedingScheduler {
      * @param petFeeder The PetFeeder instance to use for dispensing meals.
      */
     public FeedingScheduler(PetFeeder petFeeder) {
+        if (petFeeder == null) {
+            throw new IllegalArgumentException("PetFeeder cannot be null");
+        }
         this.petFeeder = petFeeder;
         this.executor = Executors.newSingleThreadScheduledExecutor();
     }
@@ -26,30 +29,44 @@ public class FeedingScheduler {
     /**
      * Starts a recurring feeding schedule. If a schedule is already active,
      * it will be replaced by the new one.
+     *
      * @param mealPlanIndex Index of the meal plan to dispense.
      * @param periodSeconds Interval in seconds between feedings.
      */
     public synchronized void scheduleRecurringFeeding(final int mealPlanIndex,
                                                       long periodSeconds) {
+
+        // Validate meal plan index
+        MealPlan[] plans = petFeeder.getMealPlans();
+        if (mealPlanIndex < 0 || mealPlanIndex >= plans.length) {
+            throw new IllegalArgumentException("Invalid meal plan index");
+        }
+
+        // Validate period
+        if (periodSeconds <= 0) {
+            throw new IllegalArgumentException("Period must be greater than zero");
+        }
+
+        // Cancel existing schedule if active
         if (currentTask != null && !currentTask.isCancelled()) {
             currentTask.cancel(false);
         }
 
-        currentTask = executor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    boolean dispensed = petFeeder.dispenseMeal(mealPlanIndex);
-                    if (!dispensed) {
-                        System.out.println("[Scheduler] Scheduled meal could not be dispensed (insufficient ingredients or energy budget).");
-                    } else {
-                        MealPlan[] plans = petFeeder.getMealPlans();
-                        String name = (plans[mealPlanIndex] != null) ? plans[mealPlanIndex].getName() : "(unknown meal)";
-                        System.out.println("[Scheduler] Dispensed scheduled meal: " + name);
-                    }
-                } catch (Exception e) {
-                    System.out.println("[Scheduler] Error during scheduled feeding: " + e.getMessage());
+        currentTask = executor.scheduleAtFixedRate(() -> {
+            try {
+                boolean dispensed = petFeeder.dispenseMeal(mealPlanIndex);
+
+                if (!dispensed) {
+                    System.out.println("[Scheduler] Scheduled meal could not be dispensed (insufficient ingredients or energy budget).");
+                } else {
+                    String name = (plans[mealPlanIndex] != null)
+                            ? plans[mealPlanIndex].getName()
+                            : "(unknown meal)";
+                    System.out.println("[Scheduler] Dispensed scheduled meal: " + name);
                 }
+
+            } catch (Exception e) {
+                System.out.println("[Scheduler] Error during scheduled feeding: " + e.getMessage());
             }
         }, periodSeconds, periodSeconds, TimeUnit.SECONDS);
     }
@@ -80,4 +97,3 @@ public class FeedingScheduler {
         executor.shutdownNow();
     }
 }
-
