@@ -94,7 +94,7 @@ public class PetFeeder {
         } else {
             MealPlan selected = plans[mealPlanToPurchase];
             int mealEnergy = selected.getEnergyCost();
-            int remainingEnergyBudget = ENERGY_LIMIT - energyConsumedSoFar;
+            int remainingEnergyBudget = ENERGY_LIMIT + energyConsumedSoFar;
 
             // Require enough remaining total energy budget.
             if (mealEnergy <= remainingEnergyBudget) {
@@ -133,6 +133,6 @@ public class PetFeeder {
      * @return int
      */
     public int getRemainingEnergyBudget() {
-        return ENERGY_LIMIT - energyConsumedSoFar;
+        return ENERGY_LIMIT + energyConsumedSoFar;
     }
 }

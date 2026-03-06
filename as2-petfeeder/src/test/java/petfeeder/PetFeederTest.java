@@ -299,7 +299,7 @@ class PetFeederTest {
         assertEquals(pf.getEnergyLimit(), pf.getRemainingEnergyBudget());
     }
 
-    /** Verifies that the remaining energy budget is decreased when dispensing a meal*/
+    /** Verifies that the remaining energy budget is not equal to before when dispensing a meal*/
     @Test
     void testRemainingEnergyBudget_afterReplenish() {
         pf.addMealPlan(p1);
@@ -309,6 +309,15 @@ class PetFeederTest {
         assertNotEquals(before, after);
     }
 
+    /** Verifies that the remaining energy budget is decreased when dispensing a meal*/
+    @Test
+    void testDecreasedRemainingEnergyBudget_afterReplenish() {
+        pf.addMealPlan(p1);
+        int before = pf.getRemainingEnergyBudget();
+        pf.dispenseMeal(0);
+        int after = pf.getRemainingEnergyBudget();
+        assertTrue(before > after);
+    }
 
     private int countMealPlans(MealPlan[] arr) {
         int count = 0;
