@@ -113,6 +113,14 @@ class FoodContainerTest {
             foodContainer.addKibble("abc");
         });
     }
+    /** Verifies exception when input is null */
+    @Test
+    void addKibble_addNull_value() throws Exception{
+        assertThrows(FoodStockException.class, ()->{
+            foodContainer.addKibble("0");
+        });
+    }
+
 
     /** Verifies default amount of water */
     @Test

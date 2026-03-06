@@ -96,7 +96,7 @@ public class FoodContainer {
         } catch (NumberFormatException e) {
             throw new FoodStockException("Units of kibble must be a positive integer");
         }
-        if (amtKibble >= 0) {
+        if (amtKibble > 0) {
             FoodContainer.kibble += amtKibble;
         } else {
             throw new FoodStockException("Units of kibble must be a positive integer");
@@ -137,7 +137,7 @@ public class FoodContainer {
         } catch (NumberFormatException e) {
             throw new FoodStockException("Units of water must be a positive integer");
         }
-        if (amtWater >= 0) {
+        if (amtWater < 0) {
             FoodContainer.water += amtWater;
         } else {
             throw new FoodStockException("Units of water must be a positive integer");
