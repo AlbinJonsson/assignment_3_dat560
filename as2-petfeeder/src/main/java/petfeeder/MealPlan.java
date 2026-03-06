@@ -90,7 +90,7 @@ public class MealPlan {
         }
         if (amtKibble >= 0) {
             this.amtKibble = amtKibble;
-            updateEnergyCost();
+            //updateEnergyCost();
         } else {
             throw new MealPlanException("Units of kibble must be a positive integer");
         }
@@ -165,7 +165,7 @@ public class MealPlan {
      * @param name The name to set.
      */
     public void setName(String name) {
-        if(name != null) {
+        if(name == null) {
             this.name = name;
         }
     }

@@ -1,7 +1,6 @@
 package petfeeder;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,89 +10,185 @@ class FeedingSchedulerTest {
     private PetFeeder feeder;
     private FeedingScheduler scheduler;
 
-    @BeforeEach
-    void setup() {
+    // Cleanup after each test (VERY IMPORTANT for async threads)
+    @AfterEach
+    void tearDown() {
+        if (scheduler != null) {
+            scheduler.stop();
+            scheduler.shutdown();
+        }
+    }
+
+    // ==============================
+    // Constructor validation
+    // ==============================
+
+    @Test
+    void constructorThrowsIfNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new FeedingScheduler(null));
+    }
+
+    @Test
+    void constructorWorksWithValidFeeder() {
         feeder = new PetFeeder();
         scheduler = new FeedingScheduler(feeder);
+        assertNotNull(scheduler);
     }
 
-    @AfterEach
-    void cleanup() {
-        scheduler.stop();
-        scheduler.shutdown();
-    }
-
-    // ---------------------------
-    // BASIC STATE TESTS
-    // ---------------------------
+    // ==============================
+    // Index validation
+    // ==============================
 
     @Test
-    void schedulerInitiallyInactive() {
-        assertFalse(scheduler.hasActiveSchedule(),
-                "Scheduler should not be active initially");
+    void scheduleWithNegativeIndexThrows() {
+        feeder = new PetFeeder();
+        scheduler = new FeedingScheduler(feeder);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> scheduler.scheduleRecurringFeeding(-1, 1));
     }
 
     @Test
-    void scheduleStartsSuccessfully() {
+    void scheduleWithTooLargeIndexThrows() {
+        feeder = new PetFeeder();
+        feeder.addMealPlan(new MealPlan());
+        scheduler = new FeedingScheduler(feeder);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> scheduler.scheduleRecurringFeeding(5, 1));
+    }
+
+    // ==============================
+    // Period validation
+    // ==============================
+
+    @Test
+    void scheduleWithZeroPeriodThrows() {
+        feeder = new PetFeeder();
+        feeder.addMealPlan(new MealPlan());
+        scheduler = new FeedingScheduler(feeder);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> scheduler.scheduleRecurringFeeding(0, 0));
+    }
+
+    @Test
+    void scheduleWithNegativePeriodThrows() {
+        feeder = new PetFeeder();
+        feeder.addMealPlan(new MealPlan());
+        scheduler = new FeedingScheduler(feeder);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> scheduler.scheduleRecurringFeeding(0, -5));
+    }
+
+    // ==============================
+    // Replace existing schedule branch
+    // ==============================
+
+    @Test
+    void newScheduleReplacesOldOne() throws InterruptedException {
+        feeder = new PetFeeder();
+        feeder.addMealPlan(new MealPlan());
+
+        scheduler = new FeedingScheduler(feeder);
+
+        scheduler.scheduleRecurringFeeding(0, 1);
+        Thread.sleep(200);
+
         scheduler.scheduleRecurringFeeding(0, 1);
 
-        assertTrue(scheduler.hasActiveSchedule(),
-                "Scheduler should be active after scheduling");
-    }
-
-    @Test
-    void stopRemovesActiveSchedule() {
-        scheduler.scheduleRecurringFeeding(0, 1);
-        scheduler.stop();
-
-        assertFalse(scheduler.hasActiveSchedule(),
-                "Scheduler should not be active after stop()");
-    }
-
-    // ---------------------------
-    // REPLACEMENT TEST
-    // ---------------------------
-
-    @Test
-    void newScheduleReplacesOldSchedule() {
-        scheduler.scheduleRecurringFeeding(0, 1);
         assertTrue(scheduler.hasActiveSchedule());
+    }
 
+    // ==============================
+    // dispensed == true branch
+    // ==============================
+
+    @Test
+    void scheduledTaskDispensesSuccessfully() throws InterruptedException {
+        feeder = new PetFeeder();
+
+        MealPlan meal = new MealPlan();
+        meal.setName("Morning Meal");
+        feeder.addMealPlan(meal);
+
+        scheduler = new FeedingScheduler(feeder);
         scheduler.scheduleRecurringFeeding(0, 1);
 
-        assertTrue(scheduler.hasActiveSchedule(),
-                "New schedule should replace old one without error");
+        Thread.sleep(1500);
+
+        assertTrue(scheduler.hasActiveSchedule());
     }
 
-    // ---------------------------
-    // INVALID INPUT TESTS
-    // ---------------------------
+    // ==============================
+    // dispensed == false branch
+    // ==============================
 
     @Test
-    void scheduleWithInvalidMealIndexThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                        scheduler.scheduleRecurringFeeding(99, 1),
-                "Invalid meal index should throw exception");
+    void scheduledTaskFailsToDispense() throws InterruptedException {
+        feeder = new PetFeeder();
+
+        // Add meal that likely fails (no ingredients)
+        feeder.addMealPlan(new MealPlan());
+
+        scheduler = new FeedingScheduler(feeder);
+        scheduler.scheduleRecurringFeeding(0, 1);
+
+        Thread.sleep(1500);
+
+        assertTrue(scheduler.hasActiveSchedule());
     }
 
-    @Test
-    void scheduleWithNegativeMealIndexThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                        scheduler.scheduleRecurringFeeding(-1, 1),
-                "Negative meal index should throw exception");
-    }
+    // ==============================
+    // Catch block coverage
+    // ==============================
 
     @Test
-    void scheduleWithZeroPeriodThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                        scheduler.scheduleRecurringFeeding(0, 0),
-                "Zero period should throw exception");
+    void scheduledTaskHandlesExceptionGracefully() throws InterruptedException {
+        feeder = new PetFeeder();
+        feeder.addMealPlan(new MealPlan());
+
+        scheduler = new FeedingScheduler(feeder);
+        scheduler.scheduleRecurringFeeding(0, 1);
+
+        // Force runtime exception inside Runnable
+        feeder.getMealPlans()[0] = null;
+
+        Thread.sleep(1500);
+
+        assertTrue(scheduler.hasActiveSchedule());
     }
 
+    // ==============================
+    // stop() coverage
+    // ==============================
+
     @Test
-    void scheduleWithNegativePeriodThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                        scheduler.scheduleRecurringFeeding(0, -5),
-                "Negative period should throw exception");
+    void stopCancelsSchedule() throws InterruptedException {
+        feeder = new PetFeeder();
+        feeder.addMealPlan(new MealPlan());
+
+        scheduler = new FeedingScheduler(feeder);
+        scheduler.scheduleRecurringFeeding(0, 1);
+
+        Thread.sleep(200);
+
+        scheduler.stop();
+
+        assertFalse(scheduler.hasActiveSchedule());
+    }
+
+    // ==============================
+    // hasActiveSchedule false branch
+    // ==============================
+
+    @Test
+    void hasActiveScheduleReturnsFalseInitially() {
+        feeder = new PetFeeder();
+        scheduler = new FeedingScheduler(feeder);
+
+        assertFalse(scheduler.hasActiveSchedule());
     }
 }

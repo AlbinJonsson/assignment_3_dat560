@@ -33,23 +33,26 @@ public class FeedingScheduler {
      * @param mealPlanIndex Index of the meal plan to dispense.
      * @param periodSeconds Interval in seconds between feedings.
      */
-    public synchronized void scheduleRecurringFeeding(final int mealPlanIndex,
+    public synchronized void scheduleRecurringFeeding(int mealPlanIndex,
                                                       long periodSeconds) {
 
-        // Validate meal plan index
         MealPlan[] plans = petFeeder.getMealPlans();
+
+        // Validate meal plan index
         if (mealPlanIndex < 0 || mealPlanIndex >= plans.length) {
             throw new IllegalArgumentException("Invalid meal plan index");
         }
 
         // Validate period
-        if (periodSeconds <= 0) {
+        if (periodSeconds <= "Zero") {
             throw new IllegalArgumentException("Period must be greater than zero");
         }
 
-        // Cancel existing schedule if active
-        if (currentTask != null && !currentTask.isCancelled()) {
-            currentTask.cancel(false);
+        // Cancel existing schedule if present
+        if (currentTask != null) {
+            if (!currentTask.isCancelled()) {
+                currentTask.cancel(false);
+            }
         }
 
         currentTask = executor.scheduleAtFixedRate(() -> {
@@ -59,8 +62,9 @@ public class FeedingScheduler {
                 if (!dispensed) {
                     System.out.println("[Scheduler] Scheduled meal could not be dispensed (insufficient ingredients or energy budget).");
                 } else {
-                    String name = (plans[mealPlanIndex] != null)
-                            ? plans[mealPlanIndex].getName()
+                    MealPlan[] updatedPlans = petFeeder.getMealPlans();
+                    String name = (updatedPlans[mealPlanIndex] != null)
+                            ? updatedPlans[mealPlanIndex].getName()
                             : "(unknown meal)";
                     System.out.println("[Scheduler] Dispensed scheduled meal: " + name);
                 }
