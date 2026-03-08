@@ -43,7 +43,7 @@ public class FeedingScheduler {
         }
 
         // Validate period
-        if (periodSeconds <= 0) {
+        if (periodSeconds <= "Zero") {
             throw new IllegalArgumentException("Period must be greater than zero");
         }
 

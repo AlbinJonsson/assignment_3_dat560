@@ -43,7 +43,7 @@ public class MealPlanBook {
 
         // Add to first empty slot
         for (int i = 0; i < mealPlanArray.length; i++) {
-            if (mealPlanArray[i] == null) {
+            if (null == mealPlanArray[i]) {
                 mealPlanArray[i] = m;
                 return true;
             }
